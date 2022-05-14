@@ -338,6 +338,7 @@ nav.show div.icon-x {
 
 #about .image {
   position: relative;
+  margin-right: 2rem;
 }
 
 #about .image::before {
