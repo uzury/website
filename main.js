@@ -1,95 +1,79 @@
-const nav = document.querySelector('#header nav')
-const toggle = document.querySelectorAll('nav .toggle')
-for (const element of toggle) {
-  element.addEventListener('click', function () {
-    nav.classList.toggle('show')
-  })
-}
-
-const links = document.querySelectorAll('nav ul li a')
-for (const link of links) {
-  link.addEventListener('click', function () {
-    nav.classList.remove('show')
-  })
-}
-
 const header = document.querySelector('#header')
-const navHeight = header.offsetHeight
-function changeHeaderWhenScroll() {
-  if (window.scrollY >= navHeight) {
-    header.classList.add('scroll')
-  } else {
-    header.classList.remove('scroll')
+const menuButton = document.querySelector('.menu-button')
+const menu = document.querySelector('#main-nav')
+const navLinks = [...document.querySelectorAll('.main-nav a[href^="#"]')]
+const themeToggle = document.querySelector('.theme-toggle')
+const themeColor = document.querySelector('meta[name="theme-color"]')
+
+function applyTheme(theme) {
+  const isDark = theme === 'dark'
+  document.documentElement.dataset.theme = theme
+  try {
+    localStorage.setItem('uzury-theme', theme)
+  } catch (_) {
+    // O tema continua funcionando mesmo quando o armazenamento está bloqueado.
   }
+  themeToggle.setAttribute('aria-label', isDark ? 'Ativar tema claro' : 'Ativar tema escuro')
+  themeToggle.setAttribute('title', isDark ? 'Ativar tema claro' : 'Ativar tema escuro')
+  themeColor.setAttribute('content', isDark ? '#0c0b0d' : '#faf8f2')
 }
 
-const swiper = new Swiper('.swiper', {
-  slidesPerView: 1,
-  pagination: {
-    el: '.swiper-pagination'
+applyTheme(document.documentElement.dataset.theme || 'dark')
+themeToggle.addEventListener('click', () => {
+  applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark')
+})
+
+function closeMenu() {
+  menu.classList.remove('open')
+  menuButton.setAttribute('aria-expanded', 'false')
+  menuButton.setAttribute('aria-label', 'Abrir menu')
+  document.body.classList.remove('menu-open')
+}
+
+menuButton.addEventListener('click', () => {
+  const isOpen = menuButton.getAttribute('aria-expanded') === 'true'
+  menu.classList.toggle('open', !isOpen)
+  menuButton.setAttribute('aria-expanded', String(!isOpen))
+  menuButton.setAttribute('aria-label', isOpen ? 'Abrir menu' : 'Fechar menu')
+  document.body.classList.toggle('menu-open', !isOpen)
+})
+
+navLinks.forEach((link) => link.addEventListener('click', closeMenu))
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeMenu()
+})
+
+function updateHeader() {
+  header.classList.toggle('scrolled', window.scrollY > 18)
+}
+
+updateHeader()
+window.addEventListener('scroll', updateHeader, { passive: true })
+
+const revealObserver = new IntersectionObserver(
+  (entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return
+      entry.target.classList.add('revealed')
+      observer.unobserve(entry.target)
+    })
   },
-  mousewheel: true,
-  keyboard: true,
-  breakpoints: {
-    767: {
-      slidesPerView: 2,
-      setWrapperSize: true
-    }
-  }
-})
-
-const scrollReveal = ScrollReveal({
-  origin: 'top',
-  distance: '30px',
-  duration: 700,
-  reset: true
-})
-
-scrollReveal.reveal(
-  `#home .image, #home .text,
-  #about .image, #about .text,
-  #services header, #services .card,
-  #testimonials header, #testimonials .testimonials
-  #contact .text, #contact .links, footer .brand, footer .social
-  `,
-  { interval: 100 }
+  { threshold: 0.12 }
 )
 
-const backToTopButton = document.querySelector('.back-to-top')
-function backToTop() {
-  if (window.scrollY >= 500) {
-    backToTopButton.classList.add('show')
-  } else {
-    backToTopButton.classList.remove('show')
-  }
-}
+document.querySelectorAll('[data-reveal]').forEach((element) => revealObserver.observe(element))
 
-const sections = document.querySelectorAll('main section[id]')
-function activateMenuAtCurrentSection() {
-  const checkpoint = window.pageYOffset + (window.innerHeight / 8) * 4
-  for (const section of sections) {
-    const sectionTop = section.offsetTop
-    const sectionHeight = section.offsetHeight
-    const sectionId = section.getAttribute('id')
+const sectionObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return
+      navLinks.forEach((link) => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`)
+      })
+    })
+  },
+  { rootMargin: '-35% 0px -55%', threshold: 0 }
+)
 
-    const checkpointStart = checkpoint >= sectionTop
-    const checkpointEnd = checkpoint <= sectionTop + sectionHeight
-
-    if (checkpointStart && checkpointEnd) {
-      document
-        .querySelector('nav ul li a[href*=' + sectionId + ']')
-        .classList.add('active')
-    } else {
-      document
-        .querySelector('nav ul li a[href*=' + sectionId + ']')
-        .classList.remove('active')
-    }
-  }
-}
-
-/* When Scroll */
-window.addEventListener('scroll', function () {
-  changeHeaderWhenScroll()
-  backToTop()
-  activateMenuAtCurrentSection()
-})
+document.querySelectorAll('main section[id]').forEach((section) => sectionObserver.observe(section))
+document.querySelector('#year').textContent = new Date().getFullYear()
