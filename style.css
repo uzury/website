@@ -61,7 +61,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--lime); outline-
 .nav-wrap { height: 76px; display: flex; align-items: center; justify-content: space-between; }
 .brand { display: inline-flex; align-items: center; gap: .65rem; font: 800 1.2rem/1 var(--display); letter-spacing: -.05em; }
 .brand > span:last-child > span { color: var(--red); }
-.brand-die { width: 34px; height: 34px; display: grid; place-items: center; border: 1.5px solid currentColor; font: 700 .62rem/1 var(--display); clip-path: polygon(50% 0,94% 23%,94% 77%,50% 100%,6% 77%,6% 23%); }
+.brand-die { width: 34px; height: 34px; display: grid; place-items: center; background-color: var(--red); border: 0em solid currentColor; font: 700 1rem/1 var(--display); clip-path: polygon(50% 0,94% 23%,94% 77%,50% 100%,6% 77%,6% 23%); }
 .main-nav { margin-left: auto; display: flex; align-items: center; gap: 2rem; font-size: .88rem; font-weight: 600; }
 .main-nav > a:not(.nav-cta) { color: var(--nav-text); position: relative; }
 .main-nav > a:not(.nav-cta)::after { content: ''; position: absolute; left: 0; right: 100%; bottom: -.45rem; height: 2px; background: var(--red); transition: right .2s ease; }
